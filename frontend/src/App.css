@@ -1,0 +1,357 @@
+/* Reset and Base Styles */
+body,
+html,
+#root,
+.App {
+  height: 100%;
+  margin: 0;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.App {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background-color: #fff;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Sidebar Styling */
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+  background-color: #f5f5f5;
+  border-right: 1px solid #e0e0e0;
+  width: 60px;
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+}
+
+.sidebar-button {
+  background: none;
+  border: none;
+  padding: 15px 0;
+  margin: 5px 0;
+  cursor: pointer;
+  font-size: 18px;
+  color: #555;
+  transition: background-color 0.3s, color 0.3s;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.sidebar-button:hover {
+  background-color: #e0e0e0;
+  border-radius: 4px;
+}
+
+.sidebar-button.active {
+  background-color: #d0d0d0;
+  border-radius: 4px;
+  color: #000;
+}
+
+/* Color and Stroke Controls */
+.sidebar-control {
+  padding: 10px 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.color-picker {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  background: none;
+}
+
+.stroke-width {
+  width: 40px;
+  cursor: pointer;
+  -webkit-appearance: none;
+  background: transparent;
+}
+
+.stroke-width::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  height: 20px;
+  width: 20px;
+  border-radius: 50%;
+  background: #007bff;
+  cursor: pointer;
+  margin-top: -8px;
+}
+
+.stroke-width::-webkit-slider-runnable-track {
+  width: 100%;
+  height: 4px;
+  background: #ddd;
+  border-radius: 2px;
+}
+
+/* Main Container */
+.main-container {
+  display: flex;
+  flex: 1;
+  margin-left: 60px; /* Width of the sidebar */
+  margin-top: 0;
+  position: relative;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Content Container */
+.content-container {
+  display: flex;
+  flex: 1;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+/* Whiteboard Canvas */
+.canvas-container {
+  flex: 1;
+  position: relative; /* Ensure positioning context for dimension box */
+  width: 100%;
+  height: 100%;
+  display: flex;
+  padding: 0;
+  margin: 0;
+  overflow: hidden;
+}
+
+.whiteboard-canvas {
+  width: 100% !important;
+  height: 100% !important;
+  display: block;
+  touch-action: none;
+  background-color: white; /* Ensure the canvas has a white background */
+}
+
+/* Floating Video Feeds */
+.video-feeds {
+  position: fixed;
+  bottom: 100px; /* Position above the bottom controls */
+  right: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  z-index: 999; /* Ensure it's below the toolbar if overlapping */
+}
+
+.floating-video-feeds {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 10;
+}
+
+.local-video,
+.remote-video {
+  width: 150px;
+  height: 100px;
+  background-color: black;
+  border: 2px solid white;
+  border-radius: 5px;
+}
+
+.local-video {
+  transform: scaleX(-1); /* Mirror local video */
+}
+
+.remote-video {
+  /* No mirroring for remote video */
+}
+
+/* Audio Indicator Styling */
+.audio-indicator {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background-color: #28a745;
+  color: #fff;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.audio-indicator.off {
+  background-color: #dc3545;
+}
+
+/* Error Message Styling */
+.error-message {
+  background-color: rgba(255, 0, 0, 0.8);
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 14px;
+  margin-bottom: 10px;
+  text-align: center;
+  width: 150px;
+}
+
+/* Size Display Styling */
+.size-display {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background-color: rgba(255, 255, 255, 0.9);
+  padding: 6px 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+  color: #333;
+  pointer-events: none; /* Allows clicks to pass through */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Notification Styling */
+.notification {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: rgba(255, 0, 0, 0.8);
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 16px;
+  z-index: 1100; /* Above video feeds */
+}
+
+/* Bottom Controls Styling */
+.bottom-input {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  background-color: #f5f5f5;
+  padding: 10px 15px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+}
+
+.bottom-input input {
+  padding: 8px 12px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  margin-right: 10px;
+  width: 200px;
+}
+
+.copy-button,
+.join-button,
+.create-button {
+  background-color: #007bff;
+  border: none;
+  color: #fff;
+  padding: 8px 10px;
+  margin-left: 5px;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  transition: background-color 0.3s;
+}
+
+.copy-button:hover,
+.join-button:hover,
+.create-button:hover {
+  background-color: #0056b3;
+}
+
+.copy-button svg,
+.join-button svg,
+.create-button svg {
+  margin-right: 5px;
+}
+
+/* Disabled Input and Buttons */
+.bottom-input input:disabled,
+.copy-button:disabled,
+.join-button:disabled,
+.create-button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.sidebar-button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+/* Ensure toolbar is above canvas */
+.toolbar-container {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 1000; /* Higher than other elements */
+  pointer-events: all; /* Make sure clicks register */
+}
+
+/* Responsive Adjustments */
+@media (max-width: 800px) {
+  .video-feeds {
+    bottom: 120px; /* Adjust if needed */
+    right: 10px;
+  }
+
+  .local-video,
+  .remote-video {
+    width: 120px;
+    height: 80px;
+    margin-bottom: 8px;
+  }
+
+  .bottom-input {
+    width: 90%;
+    left: 50%;
+    transform: translateX(-50%);
+    flex-direction: column;
+  }
+
+  .bottom-input input {
+    width: 100%;
+    margin: 0 0 10px 0;
+  }
+
+  .copy-button,
+  .join-button,
+  .create-button {
+    width: 100%;
+    justify-content: center;
+    margin: 5px 0;
+  }
+
+  .size-display {
+    top: auto;
+    bottom: 10px;
+    left: 10px;
+  }
+}

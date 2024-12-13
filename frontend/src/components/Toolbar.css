@@ -1,0 +1,187 @@
+.toolbar {
+  position: fixed;
+  left: 20px;
+  top: 20px;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  padding: 12px;
+  display: flex;
+  gap: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  z-index: 9999; /* Ensure toolbar is above canvas */
+  pointer-events: all; /* Make sure clicks register */
+}
+
+/* Add a parent container to handle pointer events */
+.toolbar-container {
+  position: relative;
+  z-index: 9999;
+  pointer-events: none; /* Allow clicks to pass through container */
+}
+
+.tool-section {
+  display: flex;
+  gap: 8px;
+  padding: 0 8px;
+  border-right: 1px solid #eee;
+  pointer-events: auto; /* Enable clicks on sections */
+}
+
+.tool-section:last-child {
+  border: none;
+  margin-top: auto;
+}
+
+.tool-btn {
+  width: 40px;
+  height: 40px;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  background: white;
+  color: #333;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.tool-btn:hover {
+  background: #f5f5f5;
+}
+
+.tool-btn.active {
+  background: #555; /* Changed from #eee to dark grey */
+  border-color: #ddd;
+  color: #fff; /* Optional: Change text/icon color for better contrast */
+}
+
+.tool-btn svg {
+  width: 24px;
+  height: 24px;
+}
+
+.color-picker {
+  width: 40px;
+  height: 40px;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  cursor: pointer;
+  padding: 2px;
+}
+
+.width-slider {
+  width: 120px;
+  height: 40px;
+  cursor: pointer;
+}
+
+/* Bottom toolbar for undo/redo */
+.bottom-tools {
+  position: fixed;
+  left: 20px;
+  bottom: 20px;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  padding: 12px;
+  display: flex;
+  gap: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  z-index: 9999;
+  pointer-events: auto;
+}
+
+/* Save Button Styling */
+.toolbar .tool-section .tool-btn {
+  width: 40px;
+  height: 40px;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  background: white;
+  color: #000; /* Set icon color to black for better contrast */
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  margin-left: 8px; /* Adjust margin as needed */
+  z-index: 1000; /* Ensure button is above other elements */
+}
+
+.toolbar .tool-section .tool-btn svg {
+  width: 28px; /* Increase icon size for better visibility */
+  height: 28px;
+  fill: #000; /* Ensure the SVG icon has a visible fill color */
+}
+
+.toolbar .tool-section .tool-btn:hover {
+  background-color: #e0e0e0; /* Light gray background on hover */
+  border-color: #007bff; /* Match border color with icon color */
+}
+
+.toolbar .tool-section .tool-btn:active {
+  background: #e0e0e0;
+}
+
+@media (max-width: 768px) {
+  .toolbar {
+    bottom: 0;
+    top: auto;
+    width: 100%;
+    height: auto;
+    flex-direction: row;
+    padding: 8px;
+  }
+
+  .tool-group {
+    flex-direction: row;
+    border-bottom: none;
+    border-right: 1px solid #eee;
+  }
+
+  .width-slider {
+    width: 100px;
+    height: 44px;
+    writing-mode: horizontal-tb;
+  }
+
+  .bottom-tools {
+    position: static;
+    width: auto;
+    flex-direction: row;
+  }
+}
+
+/* Save Button Styling */
+.save-btn {
+  width: 40px;
+  height: 40px;
+  border: 2px solid red; /* Temporary border to make the button stand out */
+  border-radius: 8px;
+  background: yellow; /* Temporary background color to make the button stand out */
+  color: #007bff; /* Set icon color to blue for better contrast */
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  margin-left: 8px; /* Adjust margin as needed */
+  z-index: 1000; /* Ensure button is above other elements */
+}
+
+.save-btn svg {
+  width: 28px; /* Increase icon size for better visibility */
+  height: 28px;
+  fill: #007bff; /* Ensure the SVG icon has a visible fill color */
+}
+
+.save-btn:hover {
+  background-color: #e0f0ff; /* Light blue background on hover */
+  border-color: #007bff; /* Match border color with icon color */
+}
+
+.save-btn:active {
+  background: #cce4ff; /* Slightly darker blue on active */
+}
