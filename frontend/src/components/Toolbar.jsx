@@ -1,13 +1,13 @@
 import React from "react";
 import "./Toolbar.css";
-import { FiDownload } from "react-icons/fi"; // Import alternative download icon
 
 const Toolbar = ({
   currentTool,
   selectTool,
   handleUndo,
   handleRedo,
-  handleSave, // Receive the save function as a prop
+  handleSave,
+  handleClear,
   strokeColor,
   setStrokeColor,
   strokeWidth,
@@ -57,6 +57,13 @@ const Toolbar = ({
           >
             →
           </button>
+          <button
+            className={`tool-btn ${currentTool === "text" ? "active" : ""}`}
+            onClick={() => selectTool("text")}
+            title="Text"
+          >
+            T
+          </button>
         </div>
 
         <div className="tool-section">
@@ -77,17 +84,6 @@ const Toolbar = ({
             title="Brush Size"
           />
         </div>
-
-        <div className="tool-section">
-          {/* Save as Image Button */}
-          <button
-            className="tool-btn save-btn" // Add a specific class for the save button
-            onClick={handleSave}
-            title="Save as Image"
-          >
-            <FiDownload /> {/* Use the alternative icon */}
-          </button>
-        </div>
       </div>
 
       <div className="bottom-tools">
@@ -96,6 +92,16 @@ const Toolbar = ({
         </button>
         <button className="tool-btn" onClick={handleRedo} title="Redo">
           ↪
+        </button>
+        <button className="tool-btn" onClick={handleClear} title="Clear Canvas">
+          🗑️
+        </button>
+        <button
+          className="tool-btn save-btn"
+          onClick={handleSave}
+          title="Save as Image"
+        >
+          <i className="bi bi-download"></i>
         </button>
       </div>
     </div>

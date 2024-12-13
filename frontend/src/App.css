@@ -1,4 +1,3 @@
-/* Reset and Base Styles */
 body,
 html,
 #root,
@@ -17,7 +16,6 @@ html,
   flex-direction: column;
 }
 
-/* Sidebar Styling */
 .sidebar {
   display: flex;
   flex-direction: column;
@@ -56,7 +54,6 @@ html,
   color: #000;
 }
 
-/* Color and Stroke Controls */
 .sidebar-control {
   padding: 10px 0;
   display: flex;
@@ -98,7 +95,6 @@ html,
   border-radius: 2px;
 }
 
-/* Main Container */
 .main-container {
   display: flex;
   flex: 1;
@@ -109,7 +105,6 @@ html,
   overflow: hidden;
 }
 
-/* Content Container */
 .content-container {
   display: flex;
   flex: 1;
@@ -121,7 +116,6 @@ html,
   overflow: hidden;
 }
 
-/* Whiteboard Canvas */
 .canvas-container {
   flex: 1;
   position: relative; /* Ensure positioning context for dimension box */
@@ -141,7 +135,6 @@ html,
   background-color: white; /* Ensure the canvas has a white background */
 }
 
-/* Floating Video Feeds */
 .video-feeds {
   position: fixed;
   bottom: 100px; /* Position above the bottom controls */
@@ -179,7 +172,6 @@ html,
   /* No mirroring for remote video */
 }
 
-/* Audio Indicator Styling */
 .audio-indicator {
   position: absolute;
   top: 10px;
@@ -198,7 +190,6 @@ html,
   background-color: #dc3545;
 }
 
-/* Error Message Styling */
 .error-message {
   background-color: rgba(255, 0, 0, 0.8);
   color: #fff;
@@ -210,7 +201,6 @@ html,
   width: 150px;
 }
 
-/* Size Display Styling */
 .size-display {
   position: absolute;
   top: 10px;
@@ -225,7 +215,6 @@ html,
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
-/* Notification Styling */
 .notification {
   position: absolute;
   top: 50%;
@@ -239,7 +228,6 @@ html,
   z-index: 1100; /* Above video feeds */
 }
 
-/* Bottom Controls Styling */
 .bottom-input {
   position: fixed;
   bottom: 20px;
@@ -292,7 +280,6 @@ html,
   margin-right: 5px;
 }
 
-/* Disabled Input and Buttons */
 .bottom-input input:disabled,
 .copy-button:disabled,
 .join-button:disabled,
@@ -306,7 +293,6 @@ html,
   cursor: not-allowed;
 }
 
-/* Ensure toolbar is above canvas */
 .toolbar-container {
   position: fixed;
   top: 20px;
@@ -315,7 +301,6 @@ html,
   pointer-events: all; /* Make sure clicks register */
 }
 
-/* Responsive Adjustments */
 @media (max-width: 800px) {
   .video-feeds {
     bottom: 120px; /* Adjust if needed */

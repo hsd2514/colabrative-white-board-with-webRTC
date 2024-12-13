@@ -13,7 +13,7 @@ function App() {
   const [currentRoom, setCurrentRoom] = useState("");
   const [history, setHistory] = useState([]);
   const [redoStack, setRedoStack] = useState([]);
-  const [currentTool, setCurrentTool] = useState("freehand"); // Add "eraser" as a possible value
+  const [currentTool, setCurrentTool] = useState("freehand");
   const [currentSize, setCurrentSize] = useState(null);
   const [isCanvasInitialized, setIsCanvasInitialized] = useState(false);
   const [isRoomFull, setIsRoomFull] = useState(false);
@@ -32,20 +32,14 @@ function App() {
   const isDrawing = useRef(false);
   const currentStroke = useRef(null);
   const startPos = useRef({ x: 0, y: 0 });
-  const remoteAudioRef = useRef(null); // Added ref for remote audio
+  const remoteAudioRef = useRef(null);
 
-  // ICE Servers Configuration
   const ICE_SERVERS = {
-    iceServers: [
-      { urls: "stun:stun.l.google.com:19302" },
-      // Add TURN servers here if needed
-    ],
+    iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
   };
 
-  // Initialize a new PeerConnection for video
   const videoPeerConnection = useRef(null);
 
-  // Initialization Effect
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) {
@@ -67,7 +61,6 @@ function App() {
     const resizeCanvas = () => {
       if (!canvas || !contextRef.current) return;
 
-      // Save current drawing
       const imgData = contextRef.current.getImageData(
         0,
         0,
@@ -75,33 +68,26 @@ function App() {
         canvas.height
       );
 
-      // Get window dimensions
-      const width = window.innerWidth - 60; // Subtract sidebar width
+      const width = window.innerWidth - 60;
       const height = window.innerHeight;
 
-      // Set canvas dimensions
       canvas.width = width;
       canvas.height = height;
 
-      // Restore context properties
       contextRef.current.lineCap = "round";
       contextRef.current.strokeStyle = strokeColor;
       contextRef.current.lineWidth = strokeWidth;
 
-      // Restore the drawing
       contextRef.current.putImageData(imgData, 0, 0);
     };
 
-    // Initial resize
     resizeCanvas();
 
-    // Add resize observer
     const resizeObserver = new ResizeObserver(() => {
       resizeCanvas();
     });
     resizeObserver.observe(canvas.parentElement);
 
-    // Add window resize listener
     window.addEventListener("resize", resizeCanvas);
 
     setIsCanvasInitialized(true);
@@ -112,25 +98,20 @@ function App() {
     };
   }, [strokeColor, strokeWidth]);
 
-  // Redraw Effect
   useEffect(() => {
     if (isCanvasInitialized) {
       redrawCanvas(history);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [history, isCanvasInitialized]);
 
-  // WebSocket Effect for Signaling and Room Management
   useEffect(() => {
     if (currentRoom) {
-      // Initialize WebSocket with environment variable
       ws.current = new WebSocket(
         `${import.meta.env.VITE_BACKEND_URL}/${currentRoom}`
       );
 
       ws.current.onopen = () => {
         console.log("Connected to room:", currentRoom);
-        // Notify server of new participant
         ws.current.send(
           JSON.stringify({
             type: "join",
@@ -202,20 +183,18 @@ function App() {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({
           video: true,
-          audio: true, // Request audio
+          audio: true,
         });
         if (localVideoRef.current) {
           localVideoRef.current.srcObject = stream;
           console.log("Local video and audio stream set.");
         }
-        // Add tracks to peer connection if already established
         if (peerConnection.current) {
           stream.getTracks().forEach((track) => {
             peerConnection.current.addTrack(track, stream);
             console.log("Added data peer track:", track.kind);
           });
         }
-        // Add video tracks to videoPeerConnection only if it's initialized
         if (videoPeerConnection.current) {
           stream.getTracks().forEach((track) => {
             videoPeerConnection.current.addTrack(track, stream);
@@ -231,7 +210,6 @@ function App() {
     getMedia();
   }, []);
 
-  // Handle remote audio stream
   useEffect(() => {
     if (videoPeerConnection.current) {
       videoPeerConnection.current.ontrack = (event) => {
@@ -245,13 +223,10 @@ function App() {
     }
   }, []);
 
-  // Modify initiateConnection to handle both data and video PeerConnections
   const initiateConnection = async () => {
-    // Data PeerConnection
     peerConnection.current = new RTCPeerConnection(ICE_SERVERS);
     console.log("Data PeerConnection initialized.");
 
-    // Handle ICE Candidates for data connection
     peerConnection.current.onicecandidate = (event) => {
       if (event.candidate && ws.current) {
         ws.current.send(
@@ -265,7 +240,6 @@ function App() {
       }
     };
 
-    // Data Channel setup
     dataChannel.current = peerConnection.current.createDataChannel("drawData");
     dataChannel.current.onopen = () => {
       console.log("Data channel opened (initiator)");
@@ -278,7 +252,6 @@ function App() {
     };
     dataChannel.current.onmessage = (event) => {
       const stroke = JSON.parse(event.data);
-      // ...existing message handling...
       if (stroke.type === "undo") {
         handleRemoteUndo(stroke.strokeId);
       } else if (stroke.type === "redo") {
@@ -288,11 +261,9 @@ function App() {
       }
     };
 
-    // Video PeerConnection
     videoPeerConnection.current = new RTCPeerConnection(ICE_SERVERS);
     console.log("Video PeerConnection initialized.");
 
-    // Handle ICE Candidates for video connection
     videoPeerConnection.current.onicecandidate = (event) => {
       if (event.candidate && ws.current) {
         ws.current.send(
@@ -306,7 +277,6 @@ function App() {
       }
     };
 
-    // Handle remote video tracks
     videoPeerConnection.current.ontrack = (event) => {
       console.log("Received remote video track:", event.track.kind);
       const [stream] = event.streams;
@@ -318,12 +288,10 @@ function App() {
       }
     };
 
-    // Add error handling for video PeerConnection
     videoPeerConnection.current.onerror = (error) => {
       console.error("Video PeerConnection error:", error);
     };
 
-    // Add logging for when remote video stream ends
     videoPeerConnection.current.onremovetrack = (event) => {
       console.log("Remote video track removed:", event.track.kind);
       if (remoteVideoRef.current) {
@@ -332,7 +300,6 @@ function App() {
       }
     };
 
-    // Add local video tracks to video PeerConnection
     if (localVideoRef.current && localVideoRef.current.srcObject) {
       localVideoRef.current.srcObject.getTracks().forEach((track) => {
         videoPeerConnection.current.addTrack(
@@ -350,17 +317,14 @@ function App() {
       );
     }
 
-    // Create Offer for data connection
     const offerData = await peerConnection.current.createOffer();
     await peerConnection.current.setLocalDescription(offerData);
     console.log("Data offer created and set as local description.");
 
-    // Create Offer for video connection
     const offerVideo = await videoPeerConnection.current.createOffer();
     await videoPeerConnection.current.setLocalDescription(offerVideo);
     console.log("Video offer created and set as local description.");
 
-    // Send Offers via WebSocket
     ws.current.send(
       JSON.stringify({
         type: "offer-data",
@@ -379,7 +343,6 @@ function App() {
     );
     console.log("Video offer sent via WebSocket.");
 
-    // Monitor connection states
     peerConnection.current.onconnectionstatechange = () => {
       console.log(
         "Data Peer connection state:",
@@ -401,14 +364,11 @@ function App() {
     };
   };
 
-  // Modify handleOffer to handle data and video offers separately
   const handleOffer = async (offer, type) => {
     if (type === "data") {
-      // Data PeerConnection
       peerConnection.current = new RTCPeerConnection(ICE_SERVERS);
       console.log("Data PeerConnection initialized from offer.");
 
-      // Handle ICE Candidates for data connection
       peerConnection.current.onicecandidate = (event) => {
         if (event.candidate && ws.current) {
           ws.current.send(
@@ -425,7 +385,6 @@ function App() {
         }
       };
 
-      // Data Channel setup
       peerConnection.current.ondatachannel = (event) => {
         dataChannel.current = event.channel;
         dataChannel.current.onopen = () => {
@@ -439,7 +398,6 @@ function App() {
         };
         dataChannel.current.onmessage = (event) => {
           const stroke = JSON.parse(event.data);
-          // ...existing message handling...
           if (stroke.type === "undo") {
             handleRemoteUndo(stroke.strokeId);
           } else if (stroke.type === "redo") {
@@ -450,16 +408,13 @@ function App() {
         };
       };
 
-      // Set remote description for data connection
       await peerConnection.current.setRemoteDescription(offer);
       console.log("Data remote description set.");
 
-      // Create and set local description (answer) for data connection
       const answerData = await peerConnection.current.createAnswer();
       await peerConnection.current.setLocalDescription(answerData);
       console.log("Data answer created and set as local description.");
 
-      // Send answer via WebSocket for data connection
       ws.current.send(
         JSON.stringify({
           type: "answer-data",
@@ -469,7 +424,6 @@ function App() {
       );
       console.log("Data answer sent via WebSocket.");
 
-      // Monitor connection state
       peerConnection.current.onconnectionstatechange = () => {
         console.log(
           "Data Peer connection state:",
@@ -480,11 +434,9 @@ function App() {
         }
       };
     } else if (type === "video") {
-      // Video PeerConnection
       videoPeerConnection.current = new RTCPeerConnection(ICE_SERVERS);
       console.log("Video PeerConnection initialized from offer.");
 
-      // Handle ICE Candidates for video connection
       videoPeerConnection.current.onicecandidate = (event) => {
         if (event.candidate && ws.current) {
           ws.current.send(
@@ -501,7 +453,6 @@ function App() {
         }
       };
 
-      // Handle remote video tracks
       videoPeerConnection.current.ontrack = (event) => {
         console.log(
           "Received remote video track from receiver:",
@@ -514,11 +465,9 @@ function App() {
         }
       };
 
-      // Set remote description for video connection
       await videoPeerConnection.current.setRemoteDescription(offer);
       console.log("Video remote description set.");
 
-      // Add local video tracks to video PeerConnection BEFORE creating answer
       if (localVideoRef.current && localVideoRef.current.srcObject) {
         localVideoRef.current.srcObject.getTracks().forEach((track) => {
           videoPeerConnection.current.addTrack(
@@ -536,12 +485,10 @@ function App() {
         );
       }
 
-      // Create and set local description (answer) for video connection
       const answerVideo = await videoPeerConnection.current.createAnswer();
       await videoPeerConnection.current.setLocalDescription(answerVideo);
       console.log("Video answer created and set as local description.");
 
-      // Send answer via WebSocket for video connection
       ws.current.send(
         JSON.stringify({
           type: "answer-video",
@@ -551,7 +498,6 @@ function App() {
       );
       console.log("Video answer sent via WebSocket.");
 
-      // Monitor connection state
       videoPeerConnection.current.onconnectionstatechange = () => {
         console.log(
           "Video Peer connection state:",
@@ -564,7 +510,6 @@ function App() {
     }
   };
 
-  // Modify handleAnswer to handle data and video answers separately
   const handleAnswer = async (answer, type) => {
     if (type === "data" && peerConnection.current) {
       await peerConnection.current.setRemoteDescription(answer);
@@ -575,7 +520,6 @@ function App() {
     }
   };
 
-  // Handle Received ICE Candidates for both connections
   const handleNewICECandidate = async (candidate, type) => {
     if (type === "data" && peerConnection.current) {
       try {
@@ -598,10 +542,8 @@ function App() {
     }
   };
 
-  // Modify addStroke to include logging and ensure strokes are sent when data channel is open
   const addStroke = (stroke, emit = true) => {
     if (emit) {
-      // Include local user's strokeColor and strokeWidth
       const strokeWithStyle = {
         ...stroke,
         color: strokeColor,
@@ -624,33 +566,33 @@ function App() {
         console.warn("Data channel is not initialized.");
       }
     } else {
-      // Use the received stroke as is
       setHistory((prevHistory) => [...prevHistory, stroke]);
       drawStrokeOnCanvas(stroke);
     }
   };
 
-  // Function to draw a single stroke on the canvas
-  const drawStrokeOnCanvas = (stroke) => {
+  const drawStrokeOnCanvas = (stroke, preview = false) => {
     const context = contextRef.current;
     const canvas = canvasRef.current;
 
     if (!context || !canvas) return;
 
+    // Save the current context state
+    context.save();
+
+    // Setup common properties
     context.beginPath();
     context.lineCap = "round";
     context.lineJoin = "round";
+    context.strokeStyle = stroke.color || strokeColor;
+    context.lineWidth = stroke.width || strokeWidth;
 
-    // Set drawing mode
+    // Handle eraser separately
     if (stroke.type === "eraser") {
       context.globalCompositeOperation = "destination-out";
-      context.strokeStyle = "rgba(128,128,128,1)"; // Ensure full transparency
     } else {
       context.globalCompositeOperation = "source-over";
-      context.strokeStyle = stroke.color || strokeColor;
     }
-
-    context.lineWidth = stroke.width || strokeWidth;
 
     switch (stroke.type) {
       case "freehand":
@@ -693,7 +635,6 @@ function App() {
           stroke.end.y * canvas.height - stroke.start.y * canvas.height;
         const angle = Math.atan2(dy, dx);
 
-        // Draw line
         context.moveTo(
           stroke.start.x * canvas.width,
           stroke.start.y * canvas.height
@@ -703,7 +644,6 @@ function App() {
           stroke.end.y * canvas.height
         );
 
-        // Draw arrowhead
         context.lineTo(
           stroke.end.x * canvas.width -
             headLength * Math.cos(angle - Math.PI / 6),
@@ -721,14 +661,25 @@ function App() {
             headLength * Math.sin(angle + Math.PI / 6)
         );
         break;
+
+      case "text":
+        context.font = `${stroke.width * 10}px Arial`;
+        context.fillStyle = stroke.color;
+        context.fillText(
+          stroke.text,
+          stroke.x * canvas.width,
+          stroke.y * canvas.height
+        );
+        break;
     }
 
     context.stroke();
     context.closePath();
-    context.globalCompositeOperation = "source-over";
+
+    // Restore the context state
+    context.restore();
   };
 
-  // Redraw Canvas Function
   const redrawCanvas = (currentHistory) => {
     const context = contextRef.current;
     const canvas = canvasRef.current;
@@ -745,7 +696,6 @@ function App() {
     });
   };
 
-  // Mouse Event Handlers
   const handleMouseDown = (e) => {
     if (!canvasRef.current || !contextRef.current || isRoomFull) return;
 
@@ -771,8 +721,13 @@ function App() {
   };
 
   const handleMouseMove = (e) => {
-    if (!isDrawing.current) return;
-    if (!canvasRef.current || !contextRef.current || isRoomFull) return;
+    if (
+      !isDrawing.current ||
+      !canvasRef.current ||
+      !contextRef.current ||
+      isRoomFull
+    )
+      return;
 
     const { offsetX, offsetY } = e.nativeEvent;
     const w = canvasRef.current.width;
@@ -784,51 +739,46 @@ function App() {
       (currentTool === "freehand" || currentTool === "eraser") &&
       currentStroke.current
     ) {
-      currentStroke.current.points.push({ x, y });
+      // For freehand/eraser, just draw the new segment
       const context = contextRef.current;
-      const lastIndex = currentStroke.current.points.length - 1;
-      if (lastIndex < 1) return;
+      const lastPoint =
+        currentStroke.current.points[currentStroke.current.points.length - 1];
 
-      const x0 =
-        currentStroke.current.points[lastIndex - 1].x * canvasRef.current.width;
-      const y0 =
-        currentStroke.current.points[lastIndex - 1].y *
-        canvasRef.current.height;
-      const x1 = x * canvasRef.current.width;
-      const y1 = y * canvasRef.current.height;
-
+      context.save();
       context.beginPath();
-      context.moveTo(x0, y0);
-      context.lineTo(x1, y1);
+      context.lineCap = "round";
+      context.lineJoin = "round";
+      context.strokeStyle =
+        currentTool === "eraser" ? "rgba(0,0,0,1)" : strokeColor;
+      context.lineWidth = strokeWidth;
+      context.globalCompositeOperation =
+        currentTool === "eraser" ? "destination-out" : "source-over";
+
+      context.moveTo(lastPoint.x * w, lastPoint.y * h);
+      context.lineTo(x * w, y * h);
       context.stroke();
-      context.closePath();
+      context.restore();
+
+      currentStroke.current.points.push({ x, y });
     } else if (["line", "rectangle", "arrow"].includes(currentTool)) {
-      // Preview the shape while drawing
-      const context = contextRef.current;
-      const canvas = canvasRef.current;
-
-      // Clear the canvas and redraw history
+      // For shapes, redraw everything
       redrawCanvas(history);
-
-      // Draw preview
-      const previewStroke = {
-        type: currentTool,
-        start: startPos.current,
-        end: { x, y },
-        color: strokeColor,
-        width: strokeWidth,
-      };
-      drawStrokeOnCanvas(previewStroke);
+      drawStrokeOnCanvas(
+        {
+          type: currentTool,
+          start: startPos.current,
+          end: { x, y },
+          color: strokeColor,
+          width: strokeWidth,
+        },
+        true
+      );
     }
 
-    // Update current size for shapes
-    if (
-      ["line", "rectangle", "curve", "arrow"].includes(currentTool) &&
-      isDrawing.current
-    ) {
-      const width = Math.abs(x - startPos.current.x) * canvasRef.current.width;
-      const height =
-        Math.abs(y - startPos.current.y) * canvasRef.current.height;
+    // Update dimensions if needed
+    if (["line", "rectangle", "arrow"].includes(currentTool)) {
+      const width = Math.abs(x - startPos.current.x) * w;
+      const height = Math.abs(y - startPos.current.y) * h;
       setCurrentSize({ width, height });
     }
   };
@@ -838,71 +788,39 @@ function App() {
     if (!canvasRef.current || !contextRef.current || isRoomFull) return;
 
     isDrawing.current = false;
-    const { offsetX, offsetY } = e.nativeEvent;
-    const w = canvasRef.current.width;
-    const h = canvasRef.current.height;
-    const x = offsetX / w;
-    const y = offsetY / h;
-    const endPos = { x, y };
 
     if (
       (currentTool === "freehand" || currentTool === "eraser") &&
       currentStroke.current
     ) {
-      addStroke(currentStroke.current, true);
-      currentStroke.current = null;
-    } else if (["line", "rectangle", "curve", "arrow"].includes(currentTool)) {
-      let stroke = null;
+      const finalStroke = {
+        ...currentStroke.current,
+        color: strokeColor,
+        width: strokeWidth,
+      };
+      addStroke(finalStroke, true);
+    } else if (["line", "rectangle", "arrow"].includes(currentTool)) {
+      const { offsetX, offsetY } = e.nativeEvent;
+      const w = canvasRef.current.width;
+      const h = canvasRef.current.height;
 
-      if (currentTool === "line") {
-        stroke = {
-          strokeId: uuidv4(),
-          type: "line",
-          start: startPos.current,
-          end: endPos,
-        };
-      } else if (currentTool === "rectangle") {
-        stroke = {
-          strokeId: uuidv4(),
-          type: "rectangle",
-          start: startPos.current,
-          end: endPos,
-        };
-      } else if (currentTool === "curve") {
-        // Revert to quadratic Bézier curve to maintain stroke data compatibility
-        const dx = endPos.x - startPos.current.x;
-        const dy = endPos.y - startPos.current.y;
-        const control = {
-          x: startPos.current.x + dx / 2,
-          y: startPos.current.y + dy / 2 - Math.abs(dy) * 0.2, // Single control point
-        };
-        stroke = {
-          strokeId: uuidv4(),
-          type: "curve",
-          start: startPos.current,
-          control: control,
-          end: endPos,
-        };
-      } else if (currentTool === "arrow") {
-        stroke = {
-          strokeId: uuidv4(),
-          type: "arrow",
-          start: startPos.current,
-          end: endPos,
-        };
-      }
+      const finalStroke = {
+        strokeId: uuidv4(),
+        type: currentTool,
+        start: startPos.current,
+        end: { x: offsetX / w, y: offsetY / h },
+        color: strokeColor,
+        width: strokeWidth,
+      };
 
-      if (stroke) {
-        addStroke(stroke, true);
-      }
-
-      setCurrentSize(null);
+      addStroke(finalStroke, true);
     }
 
+    currentStroke.current = null;
+    setCurrentSize(null);
     setIsErasing(false);
   };
 
-  // Undo Function
   const handleUndo = () => {
     if (history.length === 0) return;
 
@@ -921,7 +839,6 @@ function App() {
     }
   };
 
-  // Redo Function
   const handleRedo = () => {
     if (redoStack.length === 0) return;
 
@@ -935,7 +852,6 @@ function App() {
     }
   };
 
-  // Function to handle remote undo
   const handleRemoteUndo = (strokeId) => {
     setHistory((prevHistory) => {
       const strokeIndex = prevHistory.findIndex(
@@ -955,19 +871,16 @@ function App() {
     });
   };
 
-  // Function to handle remote redo
   const handleRemoteRedo = (stroke) => {
     setHistory((prevHistory) => [...prevHistory, stroke]);
   };
 
-  // Function to create a new room
   const createRoom = () => {
     const newRoom = uuidv4();
     setRoom(newRoom);
     setCurrentRoom(newRoom);
   };
 
-  // Function to join an existing room
   const joinRoom = () => {
     if (room.trim() !== "") {
       setCurrentRoom(room.trim());
@@ -976,7 +889,6 @@ function App() {
     }
   };
 
-  // Function to copy Room ID to clipboard
   const copyRoomId = () => {
     if (room.trim() !== "") {
       navigator.clipboard.writeText(room);
@@ -986,33 +898,27 @@ function App() {
     }
   };
 
-  // Function to select a drawing tool
   const selectTool = (tool) => {
     setCurrentTool(tool);
   };
 
-  // Function to save the canvas as an image with higher resolution and white background
   const saveCanvasAsImage = () => {
     if (canvasRef.current && contextRef.current) {
       const canvas = canvasRef.current;
       const context = contextRef.current;
 
-      // Create a temporary canvas for higher resolution
-      const scaleFactor = 2; // Increase for higher resolution
+      const scaleFactor = 2;
       const tempCanvas = document.createElement("canvas");
       tempCanvas.width = canvas.width * scaleFactor;
       tempCanvas.height = canvas.height * scaleFactor;
       const tempContext = tempCanvas.getContext("2d");
 
-      // Fill the temporary canvas with white background
       tempContext.fillStyle = "white";
       tempContext.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
 
-      // Scale and draw the original canvas onto the temporary canvas
       tempContext.scale(scaleFactor, scaleFactor);
       tempContext.drawImage(canvas, 0, 0);
 
-      // Generate image from the temporary canvas
       const image = tempCanvas.toDataURL("image/png");
       const link = document.createElement("a");
       link.href = image;
@@ -1022,11 +928,41 @@ function App() {
       document.body.removeChild(link);
       console.log("Canvas saved as high-resolution image.");
 
-      // Clean up
       tempCanvas.remove();
     } else {
       console.error("Canvas or context reference is null.");
     }
+  };
+
+  const clearCanvas = () => {
+    if (canvasRef.current && contextRef.current) {
+      const context = contextRef.current;
+      const canvas = canvasRef.current;
+      context.clearRect(0, 0, canvas.width, canvas.height);
+      setHistory([]);
+      setRedoStack([]);
+
+      // Send clear canvas event to peer
+      if (dataChannel.current && dataChannel.current.readyState === "open") {
+        dataChannel.current.send(JSON.stringify({ type: "clear" }));
+      }
+    }
+  };
+
+  const handleTextSubmit = (textBoxArea, text) => {
+    if (!text.trim()) return;
+
+    const textStroke = {
+      strokeId: uuidv4(),
+      type: "text",
+      start: textBoxArea.start,
+      end: textBoxArea.end,
+      text: text,
+      color: strokeColor,
+      width: strokeWidth,
+    };
+
+    addStroke(textStroke, true);
   };
 
   return (
@@ -1036,12 +972,13 @@ function App() {
         selectTool={selectTool}
         handleUndo={handleUndo}
         handleRedo={handleRedo}
-        handleSave={saveCanvasAsImage} // Ensure this prop is correctly passed
+        handleSave={saveCanvasAsImage}
         strokeColor={strokeColor}
         setStrokeColor={setStrokeColor}
         strokeWidth={strokeWidth}
         setStrokeWidth={setStrokeWidth}
         isErasing={isErasing}
+        handleClear={clearCanvas}
       />
       <div className="main-container">
         <div className="content-container">
@@ -1052,6 +989,10 @@ function App() {
             handleMouseUp={handleMouseUp}
             currentSize={currentSize}
             isRoomFull={isRoomFull}
+            currentTool={currentTool}
+            strokeColor={strokeColor}
+            strokeWidth={strokeWidth}
+            handleTextSubmit={handleTextSubmit}
           />
         </div>
       </div>
@@ -1059,8 +1000,8 @@ function App() {
         localVideoRef={localVideoRef}
         remoteVideoRef={remoteVideoRef}
         cameraError={cameraError}
-      />
-      <audio ref={remoteAudioRef} autoPlay /> {/* Added audio element */}
+      />{" "}
+      <audio ref={remoteAudioRef} autoPlay />{" "}
       <RoomControls
         room={room}
         setRoom={setRoom}
@@ -1068,9 +1009,8 @@ function App() {
         copyRoomId={copyRoomId}
         joinRoom={joinRoom}
         createRoom={createRoom}
-      />
+      />{" "}
     </div>
   );
 }
-
 export default App;

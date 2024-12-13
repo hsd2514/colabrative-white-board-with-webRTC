@@ -13,7 +13,6 @@
   pointer-events: all; /* Make sure clicks register */
 }
 
-/* Add a parent container to handle pointer events */
 .toolbar-container {
   position: relative;
   z-index: 9999;
@@ -76,7 +75,6 @@
   cursor: pointer;
 }
 
-/* Bottom toolbar for undo/redo */
 .bottom-tools {
   position: fixed;
   left: 20px;
@@ -119,9 +117,26 @@
   background-color: white; /* Set canvas background to white */
 }
 
-/* Custom cursor for eraser */
 .whiteboard-canvas.eraser-cursor {
   cursor: url("/eraser-cursor.png"), crosshair; /* Replace with your cursor image path */
+}
+
+.text-input-area {
+  position: absolute;
+  background: rgba(255, 255, 255, 0.5);
+  pointer-events: all;
+  z-index: 1000;
+}
+
+.text-input-area textarea {
+  background: transparent;
+  border: none;
+  outline: none;
+  resize: none;
+  width: 100%;
+  height: 100%;
+  padding: 4px;
+  font-family: Arial;
 }
 
 @media (max-width: 768px) {
