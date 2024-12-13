@@ -571,23 +571,20 @@ function App() {
     }
   };
 
-  const drawStrokeOnCanvas = (stroke, preview = false) => {
+  // Update drawStrokeOnCanvas function
+  const drawStrokeOnCanvas = (stroke) => {
     const context = contextRef.current;
     const canvas = canvasRef.current;
 
     if (!context || !canvas) return;
 
-    // Save the current context state
     context.save();
-
-    // Setup common properties
     context.beginPath();
     context.lineCap = "round";
     context.lineJoin = "round";
     context.strokeStyle = stroke.color || strokeColor;
     context.lineWidth = stroke.width || strokeWidth;
 
-    // Handle eraser separately
     if (stroke.type === "eraser") {
       context.globalCompositeOperation = "destination-out";
     } else {
@@ -595,6 +592,16 @@ function App() {
     }
 
     switch (stroke.type) {
+      case "text":
+        context.font = `${stroke.width * 10}px Arial`;
+        context.fillStyle = stroke.color || strokeColor;
+        context.fillText(
+          stroke.text,
+          stroke.x * canvas.width,
+          stroke.y * canvas.height
+        );
+        break;
+
       case "freehand":
       case "eraser":
         if (!stroke.points || stroke.points.length === 0) return;
@@ -661,22 +668,11 @@ function App() {
             headLength * Math.sin(angle + Math.PI / 6)
         );
         break;
-
-      case "text":
-        context.font = `${stroke.width * 10}px Arial`;
-        context.fillStyle = stroke.color;
-        context.fillText(
-          stroke.text,
-          stroke.x * canvas.width,
-          stroke.y * canvas.height
-        );
-        break;
     }
 
-    context.stroke();
-    context.closePath();
-
-    // Restore the context state
+    if (stroke.type !== "text") {
+      context.stroke();
+    }
     context.restore();
   };
 
@@ -949,15 +945,16 @@ function App() {
     }
   };
 
-  const handleTextSubmit = (textBoxArea, text) => {
+  // Update handleTextSubmit function
+  const handleTextSubmit = (text, position) => {
     if (!text.trim()) return;
 
     const textStroke = {
       strokeId: uuidv4(),
       type: "text",
-      start: textBoxArea.start,
-      end: textBoxArea.end,
       text: text,
+      x: position.x,
+      y: position.y,
       color: strokeColor,
       width: strokeWidth,
     };

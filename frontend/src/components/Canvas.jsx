@@ -13,7 +13,7 @@ const Canvas = ({
   handleTextSubmit, // Add this prop
 }) => {
   const [textInput, setTextInput] = useState("");
-  const [textBoxArea, setTextBoxArea] = useState(null);
+  const [textPosition, setTextPosition] = useState(null);
 
   useEffect(() => {
     if (canvasRef.current) {
@@ -30,27 +30,21 @@ const Canvas = ({
     ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
   };
 
-  const handleTextEnter = (e) => {
-    if (e.key === "Enter" && !e.shiftKey && textInput.trim()) {
-      const ctx = canvasRef.current.getContext("2d");
-      ctx.font = `${strokeWidth * 10}px Arial`;
-      ctx.fillStyle = strokeColor;
-      ctx.fillText(
-        textInput,
-        textBoxArea.x * canvasRef.current.width,
-        textBoxArea.y * canvasRef.current.height
-      );
-      setTextInput("");
-      setTextBoxArea(null);
-    }
-  };
-
   const handleCanvasClick = (e) => {
     if (currentTool === "text") {
       const rect = canvasRef.current.getBoundingClientRect();
       const x = (e.clientX - rect.left) / canvasRef.current.width;
       const y = (e.clientY - rect.top) / canvasRef.current.height;
-      setTextBoxArea({ x, y });
+      setTextPosition({ x, y });
+    }
+  };
+
+  const handleTextKeyDown = (e) => {
+    if (e.key === "Enter" && !e.shiftKey && textInput.trim()) {
+      e.preventDefault();
+      handleTextSubmit(textInput, textPosition);
+      setTextInput("");
+      setTextPosition(null);
     }
   };
 
@@ -65,16 +59,16 @@ const Canvas = ({
         onClick={handleCanvasClick}
         className="whiteboard-canvas"
       />
-      {textBoxArea && currentTool === "text" && (
+      {textPosition && currentTool === "text" && (
         <input
           type="text"
           value={textInput}
           onChange={(e) => setTextInput(e.target.value)}
-          onKeyDown={handleTextEnter}
+          onKeyDown={handleTextKeyDown}
           style={{
             position: "absolute",
-            left: textBoxArea.x * canvasRef.current.width + "px",
-            top: textBoxArea.y * canvasRef.current.height + "px",
+            left: textPosition.x * canvasRef.current.width + "px",
+            top: textPosition.y * canvasRef.current.height + "px",
             border: "none",
             background: "transparent",
             outline: "none",
